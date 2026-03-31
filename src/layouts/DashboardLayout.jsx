@@ -27,7 +27,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden light-theme" data-mood={currentMood}>
+    <div className="flex h-screen overflow-hidden bg-[#050505] text-white" data-mood={currentMood}>
       {/* Mobile overlay */}
       <AnimatePresence>
         {sidebarOpen && (

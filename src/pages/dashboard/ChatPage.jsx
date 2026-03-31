@@ -6,6 +6,8 @@ import { sendMessage } from '../../services/chatService';
 import MessageBubble from '../../components/chat/MessageBubble';
 import SplineViewer from '../../components/spline/SplineViewer';
 import { useAppContext } from '../../context/AppContext';
+import GlassPanel from '../../components/ui/GlassPanel';
+import { Wrapper3D } from '../../components/ui/Wrapper3D';
 
 export default function ChatPage() {
   const { 
@@ -222,7 +224,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-full relative overflow-hidden">
+    <div className="h-full w-full relative flex items-center justify-center overflow-hidden bg-transparent">
       {/* Scheduler Modal */}
       {showScheduler && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
@@ -318,147 +320,132 @@ export default function ChatPage() {
         </div>
       )}
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-glass-border flex items-center gap-3 bg-background-primary/50 backdrop-blur-md">
-          <div className="w-8 h-8 rounded-xl bg-accent/15 flex items-center justify-center">
-            <Sparkles size={16} className="text-accent" />
-          </div>
-          <div>
-            <h1 className="text-sm font-semibold text-white">AI Chat</h1>
-            <p className="text-[10px] text-white/30">Your emotional wellness companion</p>
-          </div>
-          <div className="ml-auto flex items-center gap-4">
-            <button onClick={() => setShowScheduler(true)} className="text-xs text-white/50 hover:text-white transition-colors cursor-pointer flex items-center gap-1"><Calendar size={12}/> Schedule</button>
-            <button onClick={endChatAndAnalyze} className="text-xs text-accent font-semibold hover:text-accent/80 transition-colors cursor-pointer border border-accent/30 px-3 py-1.5 rounded-full bg-accent/10">End & Analyze</button>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[10px] text-white/30 hidden sm:inline">Online</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 bg-transparent">
-          <AnimatePresence>
-            {messages.map((msg) => (
-              <MessageBubble
-                key={msg.id}
-                message={msg}
-                isBot={msg.sender === 'bot'}
+      {/* 3D Wrapped Main Interface */}
+      <div className="relative z-10 w-full h-full p-4 lg:p-8 flex items-center justify-center">
+        <Wrapper3D maxRotation={4} translateZ={20} className="w-full h-full max-w-6xl max-h-[850px] flex gap-6">
+          
+          {/* Left Column: Spline Viewer */}
+          <GlassPanel className="hidden lg:flex w-1/3 min-w-[320px] p-0 flex-col overflow-hidden shadow-2xl relative border-white/5 bg-black/40">
+            <div className="flex-1 w-full h-full relative">
+              <SplineViewer
+                url="https://my.spline.design/rememberallrobot-wCx0EM8GP79Xp0xl03DvSAkM/"
+                className="w-full h-full absolute inset-0 mix-blend-screen opacity-90"
               />
-            ))}
-          </AnimatePresence>
-
-          {/* Typing indicator */}
-          {isTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 mb-4"
-            >
-              <div className="glass-card px-4 py-3 rounded-2xl rounded-tl-md flex items-center gap-2">
-                <div className="flex gap-1">
-                  {[0, 1, 2].map((i) => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 rounded-full bg-accent/50"
-                      animate={{ y: [0, -6, 0] }}
-                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-                    />
-                  ))}
-                </div>
-                <span className="text-[10px] text-white/30">NueraLyn is thinking...</span>
+              <div className="absolute top-6 left-0 right-0 text-center pointer-events-none z-10 px-6">
+                 <h3 className="text-xs font-semibold text-white/50 uppercase tracking-widest flex items-center justify-center gap-2">
+                     <Sparkles size={14} className="text-gold" /> NueraLyn Companion
+                 </h3>
               </div>
-            </motion.div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        {/* Input */}
-        <div className="px-6 py-4 border-t border-glass-border bg-background-primary/50 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Type your message..."
-              className="glass-input flex-1"
-              disabled={isTyping}
-            />
-            <motion.button
-              onClick={handleSend}
-              disabled={!input.trim() || isTyping}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="w-12 h-12 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center
-                text-accent hover:bg-accent/30 hover:shadow-[0_0_20px_rgba(175,203,255,0.2)]
-                disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
-            >
-              <Send size={18} />
-            </motion.button>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Column: Chart & Spline */}
-      <div className="hidden lg:flex w-80 xl:w-96 border-l border-glass-border flex-col bg-background-primary/50 overflow-y-auto">
-        {/* Mood Chart */}
-        <div className="p-6 border-b border-glass-border shrink-0">
-            <h3 className="text-xs font-semibold text-white/60 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Sparkles size={14} className="text-accent" /> 30-Day Mood Intensity
-            </h3>
-            <div className="h-40 w-full">
-                <ResponsiveContainer width="100%" height="100%">
+              {/* Mini 30-Day Mood Chart Overlay */}
+              <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-black/30 backdrop-blur-md border border-white/5 pointer-events-none z-10">
+                <p className="text-[10px] text-white/40 uppercase tracking-widest mb-3 text-center">30-Day Emotional Range</p>
+                <div className="h-20 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                        <XAxis 
-                            dataKey="displayDate" 
-                            tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }} 
-                            interval={6} 
-                            axisLine={false}
-                            tickLine={false}
-                        />
-                        <YAxis 
-                            domain={[0, 5]} 
-                            ticks={[1, 2, 3, 4, 5]}
-                            tick={{ fontSize: 9, fill: 'rgba(255,255,255,0.3)' }}
-                            axisLine={false}
-                            tickLine={false}
-                        />
-                        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
-                        <Bar dataKey="mood" radius={[2, 2, 0, 0]}>
-                            {chartData.map((entry, index) => (
-                                <Cell 
-                                    key={`cell-${index}`} 
-                                    fill={moodStyle(entry.mood).bg} 
-                                />
-                            ))}
-                        </Bar>
+                      <XAxis dataKey="displayDate" hide />
+                      <Bar dataKey="mood" radius={[2, 2, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={moodStyle(entry.mood).bg} />
+                        ))}
+                      </Bar>
                     </BarChart>
-                </ResponsiveContainer>
-            </div>
-            <div className="flex items-center justify-between text-[10px] uppercase font-semibold text-white/30 mt-4 border-t border-glass-border pt-3">
-                <span>Low</span>
-                <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map(v => <div key={v} className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: moodStyle(v).bg }} />)}
+                  </ResponsiveContainer>
                 </div>
-                <span>High</span>
+              </div>
             </div>
-        </div>
+          </GlassPanel>
 
-        {/* Spline Viewer */}
-        <div className="flex-1 relative min-h-[400px]">
-            <SplineViewer
-            url="https://my.spline.design/rememberallrobot-wCx0EM8GP79Xp0xl03DvSAkM/"
-            className="w-full h-full"
-            />
-            <div className="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
-            <p className="text-[10px] text-white/20 uppercase tracking-widest">NueraLyn Companion</p>
+          {/* Right Column: Chat Interface */}
+          <GlassPanel className="flex-1 flex flex-col p-0 overflow-hidden shadow-2xl relative border-white/5 bg-black/40">
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-white/5 flex items-center gap-4 bg-white/[0.02]">
+              <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center">
+                <Sparkles size={20} className="text-gold" />
+              </div>
+              <div>
+                <h1 className="text-base font-bold text-white tracking-wide">AI Chat Interface</h1>
+                <p className="text-[11px] text-white/40">Your emotional wellness companion</p>
+              </div>
+              <div className="ml-auto flex items-center gap-4">
+                <button onClick={() => setShowScheduler(true)} className="text-xs text-white/50 hover:text-white transition-colors cursor-pointer flex items-center gap-1">
+                  <Calendar size={14}/> Schedule
+                </button>
+                <button onClick={endChatAndAnalyze} className="text-xs text-gold font-semibold hover:text-gold/80 transition-colors cursor-pointer border border-gold/30 px-4 py-1.5 rounded-full bg-gold/10">
+                  End & Analyze
+                </button>
+                <div className="flex items-center gap-2 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-[10px] text-green-400 font-medium hidden sm:inline uppercase tracking-wider">Online</span>
+                </div>
+              </div>
             </div>
-        </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 bg-transparent">
+              <AnimatePresence>
+                {messages.map((msg) => (
+                  <MessageBubble
+                    key={msg.id}
+                    message={msg}
+                    isBot={msg.sender === 'bot'}
+                  />
+                ))}
+              </AnimatePresence>
+
+              {/* Typing indicator */}
+              {isTyping && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-2 mb-4"
+                >
+                  <div className="bg-white/5 border border-white/10 px-5 py-3.5 rounded-2xl rounded-tl-sm flex items-center gap-2 shadow-sm">
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-1.5 h-1.5 rounded-full bg-gold/60"
+                          animate={{ y: [0, -4, 0] }}
+                          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-4 bg-white/[0.02] border-t border-white/5">
+              <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-2xl p-2 pr-2.5 focus-within:border-gold/30 focus-within:ring-1 focus-within:ring-gold/30 transition-all">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder="Type your message..."
+                  className="flex-1 bg-transparent border-none focus:outline-none text-white/90 text-sm px-4 py-2 placeholder:text-white/20"
+                  disabled={isTyping}
+                />
+                <motion.button
+                  onClick={handleSend}
+                  disabled={!input.trim() || isTyping}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center
+                    text-gold hover:bg-gold/30 hover:shadow-[0_0_15px_rgba(167,139,113,0.3)]
+                    disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
+                >
+                  <Send size={16} />
+                </motion.button>
+              </div>
+            </div>
+          </GlassPanel>
+
+        </Wrapper3D>
       </div>
     </div>
   );
